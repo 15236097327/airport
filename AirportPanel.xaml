@@ -1,0 +1,222 @@
+<UserControl x:Class="AirlineEmpire.Views.AirportPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:AirlineEmpire.Models"
+             FontFamily="Microsoft YaHei">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="12">
+
+      <!-- ── 机场标题 ── -->
+      <TextBlock Style="{StaticResource SectionHeader}" Text="机场信息"/>
+      <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+
+          <!-- IATA代码 大字 -->
+          <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                     Text="{Binding SelectedAirport.Code}"
+                     FontSize="32" FontWeight="Bold"
+                     Foreground="{StaticResource AccentBlueBrush}"
+                     FontFamily="Consolas" Margin="0,0,0,4"/>
+
+          <TextBlock Grid.Row="1" Grid.ColumnSpan="2"
+                     Text="{Binding SelectedAirport.Name}"
+                     FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"/>
+
+          <TextBlock Grid.Row="2" Grid.Column="0" Text="城市  " Style="{StaticResource SectionHeader}" Margin="0,6,0,0"/>
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedAirport.City}"
+                     Style="{StaticResource ValueText}" Margin="0,6,0,0"/>
+
+          <TextBlock Grid.Row="3" Grid.Column="0" Text="等级  " Style="{StaticResource SectionHeader}" Margin="0,4,0,0"/>
+          <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4,0,0">
+            <TextBlock Text="{Binding SelectedAirport.LevelName}"
+                       Foreground="{StaticResource AccentAmberBrush}" FontSize="12"/>
+            <TextBlock Text="{Binding SelectedAirport.Level, StringFormat=' (Lv{0})'}"
+                       Foreground="{StaticResource TextDimBrush}" FontSize="11"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ── 旅客容量 ── -->
+      <TextBlock Style="{StaticResource SectionHeader}" Text="旅客容量"/>
+      <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
+        <StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="当前滞留"
+                       Style="{StaticResource SectionHeader}"/>
+            <TextBlock Grid.Column="1" Text="最大容纳"
+                       Style="{StaticResource SectionHeader}" HorizontalAlignment="Right"/>
+          </Grid>
+          <Grid Margin="0,4">
+            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="{Binding SelectedAirport.CurrentPassengers}"
+                       FontSize="28" FontWeight="Bold" FontFamily="Consolas"
+                       Foreground="{StaticResource AccentGreenBrush}"/>
+            <TextBlock Grid.Column="1"
+                       Text="{Binding SelectedAirport.MaxCapacity}"
+                       FontSize="20" FontFamily="Consolas"
+                       Foreground="{StaticResource TextDimBrush}"
+                       HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+          </Grid>
+
+          <!-- 进度条 -->
+          <Grid Height="8" Background="#FF1C2E45" Margin="0,4">
+            <Rectangle HorizontalAlignment="Left" RadiusX="4" RadiusY="4">
+              <Rectangle.Width>
+                <MultiBinding Converter="{StaticResource RatioToWidth}">
+                  <Binding Path="SelectedAirport.UrgencyRatio"/>
+                  <Binding RelativeSource="{RelativeSource AncestorType=Grid}" Path="ActualWidth"/>
+                </MultiBinding>
+              </Rectangle.Width>
+              <Rectangle.Fill>
+                <Binding Path="SelectedAirport.UrgencyLevel"
+                         Converter="{StaticResource UrgencyToColor}"/>
+              </Rectangle.Fill>
+            </Rectangle>
+          </Grid>
+
+          <!-- 停机位 -->
+          <TextBlock Margin="0,6,0,0">
+            <Run Text="停机位  " Foreground="{StaticResource TextDimBrush}" FontSize="11"/>
+            <Run Text="{Binding SelectedAirport.StationedAircraft.Count}"
+                 Foreground="{StaticResource AccentGreenBrush}" FontFamily="Consolas"/>
+            <Run Text=" / " Foreground="{StaticResource TextDimBrush}"/>
+            <Run Text="{Binding SelectedAirport.MaxAircraftSlots}"
+                 Foreground="{StaticResource TextDimBrush}" FontFamily="Consolas"/>
+          </TextBlock>
+        </StackPanel>
+      </Border>
+
+      <!-- ── 机场内飞机 ── -->
+      <TextBlock Style="{StaticResource SectionHeader}" Text="驻场飞机"/>
+      <Border Style="{StaticResource PanelCard}" Margin="0,0,0,8">
+        <ItemsControl ItemsSource="{Binding SelectedAirport.StationedAircraft}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type models:Aircraft}">
+              <Border BorderBrush="#FF1C2E45" BorderThickness="0,0,0,1" Padding="0,5">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="0">
+                    <TextBlock>
+                      <Run Text="{Binding Registration}" FontFamily="Consolas"
+                           Foreground="{StaticResource AccentBlueBrush}" FontSize="12"/>
+                      <Run Text="{Binding Config.DisplayName}"
+                           Foreground="{StaticResource TextDimBrush}" FontSize="10"/>
+                    </TextBlock>
+                    <TextBlock FontSize="10" Margin="0,2,0,0">
+                      <Run Text="磨损 " Foreground="{StaticResource TextDimBrush}"/>
+                      <Run Text="{Binding WearPercent, StringFormat={}{0:F1}%}"
+                           Foreground="{StaticResource AccentAmberBrush}"/>
+                      <Run Text="  座位 " Foreground="{StaticResource TextDimBrush}"/>
+                      <Run Text="{Binding Seats}" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    </TextBlock>
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                             FontSize="11" Foreground="{StaticResource AccentGreenBrush}"
+                             VerticalAlignment="Center"/>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+          <ItemsControl.Style>
+            <Style TargetType="ItemsControl">
+              <Style.Triggers>
+                <Trigger Property="HasItems" Value="False">
+                  <Setter Property="Template">
+                    <Setter.Value>
+                      <ControlTemplate>
+                        <TextBlock Text="暂无驻场飞机"
+                                   Foreground="{StaticResource TextDimBrush}"
+                                   FontSize="11" HorizontalAlignment="Center"
+                                   Margin="0,8"/>
+                      </ControlTemplate>
+                    </Setter.Value>
+                  </Setter>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </ItemsControl.Style>
+        </ItemsControl>
+      </Border>
+
+      <!-- ── 操作按钮 ── -->
+      <TextBlock Style="{StaticResource SectionHeader}" Text="操作"/>
+      <Grid Margin="0,0,0,4">
+        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
+        <Button Grid.Column="0"
+                Content="{Binding SelectedAirport.CanUpgrade,
+                  Converter={StaticResource BoolToUpgradeText}}"
+                Style="{StaticResource BtnAmber}"
+                Command="{Binding UpgradeAirportCommand}"
+                IsEnabled="{Binding SelectedAirport.CanUpgrade}"/>
+        <Button Grid.Column="2"
+                Content="购买飞机"
+                Style="{StaticResource BtnBlue}"
+                Command="{Binding OpenBuyAircraftCommand}"/>
+      </Grid>
+
+      <!-- 升级费用提示 -->
+      <TextBlock HorizontalAlignment="Center" FontSize="10"
+                 Foreground="{StaticResource TextDimBrush}" Margin="0,2,0,8">
+        <Run Text="升级费用 "/>
+        <Run Text="{Binding SelectedAirport.UpgradeCost, StringFormat='¥{0:N0}'}"
+             Foreground="{StaticResource AccentAmberBrush}"/>
+      </TextBlock>
+
+      <!-- ── 购机面板（内嵌） ── -->
+      <Border Visibility="{Binding IsBuyAircraftPanelOpen,
+                Converter={StaticResource BoolToVisibility}}"
+              Style="{StaticResource PanelCard}"
+              BorderBrush="{StaticResource AccentBlueBrush}">
+        <StackPanel>
+          <TextBlock Text="选择机型" Style="{StaticResource SectionHeader}"/>
+          <ItemsControl ItemsSource="{Binding AvailableTypes}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate DataType="{x:Type models:AircraftTypeConfig}">
+                <Button Margin="0,3" Style="{StaticResource BtnGhost}"
+                        Command="{Binding DataContext.BuyAircraftCommand,
+                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding TypeCode}">
+                  <Grid Width="210">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding DisplayName}"
+                                 Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
+                      <TextBlock FontSize="10" Foreground="{StaticResource TextDimBrush}">
+                        <Run Text="{Binding Seats}"/><Run Text="座  "/><Run Text="{Binding SpeedKmH}"/><Run Text="km/h"/>
+                      </TextBlock>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding PurchaseCost, StringFormat='¥{0:N0}'}"
+                               Foreground="{StaticResource AccentGreenBrush}"
+                               FontFamily="Consolas" FontSize="12"
+                               VerticalAlignment="Center"/>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Content="取消" Style="{StaticResource BtnGhost}"
+                  Margin="0,6,0,0" FontSize="11"
+                  Command="{Binding OpenBuyAircraftCommand}"/>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

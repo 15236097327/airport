@@ -1,0 +1,167 @@
+<Window x:Class="AirlineEmpire.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:AirlineEmpire.Views"
+        Title="航空帝国" Height="800" Width="1400"
+        MinHeight="700" MinWidth="1200"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResize">
+
+  <Window.Resources>
+    <!-- 日志等级颜色 -->
+    <SolidColorBrush x:Key="LogInfo"  Color="#FF607898"/>
+    <SolidColorBrush x:Key="LogAlert" Color="#FFFFC107"/>
+    <SolidColorBrush x:Key="LogError" Color="#FFFF3D3D"/>
+  </Window.Resources>
+
+  <!-- 圆角窗口容器 -->
+  <Border Background="{StaticResource BgDeepBrush}"
+          BorderBrush="#FF1C2E45" BorderThickness="1"
+          CornerRadius="10"
+          MouseLeftButtonDown="OnTitleBarDrag">
+
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="44"/>    <!-- 标题栏 -->
+        <RowDefinition Height="*"/>     <!-- 主内容 -->
+        <RowDefinition Height="160"/>   <!-- 底部日志 -->
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="220"/> <!-- 左侧排行榜 -->
+        <ColumnDefinition Width="*"/>   <!-- 地图 -->
+        <ColumnDefinition Width="260"/> <!-- 右侧机场面板 -->
+      </Grid.ColumnDefinitions>
+
+      <!-- ═══════ 标题栏 ═══════ -->
+      <Border Grid.Row="0" Grid.ColumnSpan="3"
+              Background="#FF0A1322"
+              BorderBrush="#FF1C2E45" BorderThickness="0,0,0,1"
+              CornerRadius="10,10,0,0">
+        <Grid>
+          <StackPanel Orientation="Horizontal" Margin="16,0">
+            <TextBlock Text="✈" FontSize="18" Foreground="{StaticResource AccentBlueBrush}"
+                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <TextBlock Text="航空帝国" FontSize="14" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       VerticalAlignment="Center" FontFamily="Microsoft YaHei"/>
+            <Rectangle Width="1" Fill="#FF1C2E45" Margin="16,8"/>
+
+            <!-- HUD：资金 -->
+            <StackPanel Orientation="Horizontal" Margin="8,0" VerticalAlignment="Center">
+              <TextBlock Text="资金  " Style="{StaticResource SectionHeader}" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding State.FundsText}" Style="{StaticResource HudNumber}"/>
+            </StackPanel>
+
+            <!-- HUD：时间 -->
+            <StackPanel Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+              <TextBlock Text="游戏时间  " Style="{StaticResource SectionHeader}" VerticalAlignment="Center"/>
+              <TextBlock Text="{Binding GameTimeText}" Style="{StaticResource HudNumber}"/>
+            </StackPanel>
+
+            <!-- 时间倍速 -->
+            <StackPanel Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+              <TextBlock Text="倍速  " Style="{StaticResource SectionHeader}" VerticalAlignment="Center"/>
+              <Button Content="×1"  Style="{StaticResource BtnGhost}" Margin="2,0"
+                      Command="{Binding SetSpeedCommand}" CommandParameter="1"/>
+              <Button Content="×2"  Style="{StaticResource BtnGhost}" Margin="2,0"
+                      Command="{Binding SetSpeedCommand}" CommandParameter="2"/>
+              <Button Content="×5"  Style="{StaticResource BtnGhost}" Margin="2,0"
+                      Command="{Binding SetSpeedCommand}" CommandParameter="5"/>
+              <Button Content="×10" Style="{StaticResource BtnGhost}" Margin="2,0"
+                      Command="{Binding SetSpeedCommand}" CommandParameter="10"/>
+            </StackPanel>
+          </StackPanel>
+
+          <!-- 右侧控制 -->
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="16,0">
+            <Button Content="⏸ 暂停" Style="{StaticResource BtnGhost}"
+                    Command="{Binding TogglePauseCommand}" Margin="4,0"/>
+            <Button Content="📊 导出" Style="{StaticResource BtnGhost}"
+                    Command="{Binding ExportExcelCommand}" Margin="4,0"/>
+            <Button Content="✕" Style="{StaticResource BtnRed}"
+                    Width="32" Height="28"
+                    Click="OnClose"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ═══════ 左侧：紧迫度排行榜 ═══════ -->
+      <Border Grid.Row="1" Grid.Column="0"
+              Background="{StaticResource BgPanelBrush}"
+              BorderBrush="#FF1C2E45" BorderThickness="0,0,1,0">
+        <local:RankingPanel DataContext="{Binding RankingVM}"/>
+      </Border>
+
+      <!-- ═══════ 中间：地图 Canvas ═══════ -->
+      <Border Grid.Row="1" Grid.Column="1"
+              Background="#FF060D18"
+              ClipToBounds="True">
+        <local:MapCanvas x:Name="MapCanvasCtrl"
+                         DataContext="{Binding MapVM}"/>
+      </Border>
+
+      <!-- ═══════ 右侧：机场信息面板 ═══════ -->
+      <Border Grid.Row="1" Grid.Column="2"
+              Background="{StaticResource BgPanelBrush}"
+              BorderBrush="#FF1C2E45" BorderThickness="1,0,0,0">
+        <local:AirportPanel DataContext="{Binding}"
+                            Visibility="{Binding IsAirportPanelVisible,
+                              Converter={StaticResource BoolToVisibility}}"/>
+      </Border>
+
+      <!-- ═══════ 底部：操作日志 ═══════ -->
+      <Border Grid.Row="2" Grid.ColumnSpan="3"
+              Background="#FF080F1A"
+              BorderBrush="#FF1C2E45" BorderThickness="0,1,0,0">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.Row="0" Text="操作日志" Margin="12,6,0,4"
+                     Style="{StaticResource SectionHeader}"/>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Logs}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel Orientation="Horizontal" Margin="12,1">
+                    <TextBlock Text="{Binding Time}" Width="60"
+                               Foreground="{StaticResource TextDimBrush}"
+                               FontFamily="Consolas" FontSize="11"/>
+                    <TextBlock Text="{Binding Message}" FontSize="11"
+                               FontFamily="Microsoft YaHei"/>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+
+      <!-- ═══════ 游戏结束遮罩 ═══════ -->
+      <Border Grid.Row="0" Grid.RowSpan="3" Grid.ColumnSpan="3"
+              Background="#CC060D18"
+              Visibility="{Binding IsGameOverVisible,
+                Converter={StaticResource BoolToVisibility}}">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+          <TextBlock Text="游戏结束" FontSize="48" FontWeight="Bold"
+                     Foreground="{StaticResource AccentRedBrush}"
+                     FontFamily="Microsoft YaHei"
+                     HorizontalAlignment="Center"/>
+          <TextBlock Text="{Binding State.GameOverReason}"
+                     FontSize="16" Foreground="{StaticResource TextDimBrush}"
+                     HorizontalAlignment="Center" Margin="0,8"/>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24">
+            <Button Content="导出 Excel" Style="{StaticResource BtnBlue}"
+                    Command="{Binding ExportExcelCommand}" Margin="8,0"/>
+            <Button Content="导出 CSV"   Style="{StaticResource BtnGhost}"
+                    Command="{Binding ExportCsvCommand}"   Margin="8,0"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

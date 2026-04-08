@@ -1,0 +1,240 @@
+<Window x:Class="AirlineEmpire.Views.LobbyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="航空帝国 — 游戏大厅"
+        Width="520" Height="680"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
+
+  <Border Background="{StaticResource BgDeepBrush}"
+          BorderBrush="#FF1C2E45" BorderThickness="1"
+          CornerRadius="12"
+          MouseLeftButtonDown="OnDrag">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="44"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+
+      <!-- 标题栏 -->
+      <Border Grid.Row="0" Background="#FF080F1A"
+              CornerRadius="12,12,0,0"
+              BorderBrush="#FF1C2E45" BorderThickness="0,0,0,1">
+        <Grid>
+          <StackPanel Orientation="Horizontal" Margin="16,0" VerticalAlignment="Center">
+            <TextBlock Text="✈" FontSize="20" Foreground="{StaticResource AccentBlueBrush}" Margin="0,0,8,0"/>
+            <TextBlock Text="航空帝国" FontSize="15" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       FontFamily="Microsoft YaHei"/>
+          </StackPanel>
+          <Button Content="✕" Style="{StaticResource BtnRed}"
+                  Width="30" Height="26" HorizontalAlignment="Right"
+                  Margin="0,0,8,0" Click="OnClose"/>
+        </Grid>
+      </Border>
+
+      <!-- 主内容 -->
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="36,28">
+
+          <!-- 副标题 -->
+          <TextBlock Text="建设你的航空帝国" FontSize="22" FontWeight="Bold"
+                     Foreground="{StaticResource TextPrimaryBrush}"
+                     FontFamily="Microsoft YaHei" Margin="0,0,0,4"/>
+          <TextBlock Text="连接城市  运营航线  扩张机队"
+                     FontSize="12" Foreground="{StaticResource TextDimBrush}"
+                     FontFamily="Consolas"
+                     Margin="0,0,0,28"/>
+
+          <!-- ── 玩家名 ── -->
+          <TextBlock Text="玩家名称" Style="{StaticResource SectionHeader}"/>
+          <TextBox Text="{Binding PlayerName, UpdateSourceTrigger=PropertyChanged}"
+                   Margin="0,0,0,16" Height="36"/>
+
+          <!-- ── 初始资金 ── -->
+          <TextBlock Text="初始资金" Style="{StaticResource SectionHeader}"/>
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+            <RadioButton Content="¥ 300,000  (困难)" Tag="300000"
+                         Foreground="{StaticResource TextDimBrush}"
+                         Margin="0,0,16,0" FontFamily="Microsoft YaHei"
+                         Checked="OnFundsChecked"/>
+            <RadioButton Content="¥ 500,000  (普通)" Tag="500000"
+                         IsChecked="True"
+                         Foreground="{StaticResource TextPrimaryBrush}"
+                         Margin="0,0,16,0" FontFamily="Microsoft YaHei"
+                         Checked="OnFundsChecked"/>
+            <RadioButton Content="¥ 1,000,000 (轻松)" Tag="1000000"
+                         Foreground="{StaticResource TextDimBrush}"
+                         FontFamily="Microsoft YaHei"
+                         Checked="OnFundsChecked"/>
+          </StackPanel>
+
+          <!-- ── 游戏模式 ── -->
+          <TextBlock Text="游戏模式" Style="{StaticResource SectionHeader}"/>
+          <Grid Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition/><ColumnDefinition Width="10"/><ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 单人卡片 —— 用 Tag + Trigger 控制选中高亮，不用 Style+Border.Style 双重设置 -->
+            <Border Grid.Column="0"
+                    x:Name="SingleCard"
+                    Background="{StaticResource BgCardBrush}"
+                    BorderThickness="2"
+                    CornerRadius="6" Padding="12"
+                    Cursor="Hand"
+                    MouseLeftButtonDown="OnSelectSingle">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSingleSelected}" Value="True">
+                      <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <StackPanel>
+                <TextBlock Text="🎮" FontSize="28" HorizontalAlignment="Center"/>
+                <TextBlock Text="单人模式" FontSize="14" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontFamily="Microsoft YaHei"
+                           HorizontalAlignment="Center" Margin="0,6,0,4"/>
+                <TextBlock Text="独自运营航空帝国" FontSize="11"
+                           Foreground="{StaticResource TextDimBrush}"
+                           FontFamily="Microsoft YaHei"
+                           HorizontalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+
+            <!-- 多人卡片 -->
+            <Border Grid.Column="2"
+                    x:Name="MultiCard"
+                    Background="{StaticResource BgCardBrush}"
+                    BorderThickness="2"
+                    CornerRadius="6" Padding="12"
+                    Cursor="Hand"
+                    MouseLeftButtonDown="OnSelectMulti">
+              <Border.Style>
+                <Style TargetType="Border">
+                  <Setter Property="BorderBrush" Value="{StaticResource BorderBrush2}"/>
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsMultiPlayer}" Value="True">
+                      <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}"/>
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Border.Style>
+              <StackPanel>
+                <TextBlock Text="👥" FontSize="28" HorizontalAlignment="Center"/>
+                <TextBlock Text="多人模式" FontSize="14" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           FontFamily="Microsoft YaHei"
+                           HorizontalAlignment="Center" Margin="0,6,0,4"/>
+                <TextBlock Text="联机合作/竞争" FontSize="11"
+                           Foreground="{StaticResource TextDimBrush}"
+                           FontFamily="Microsoft YaHei"
+                           HorizontalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <!-- ── 多人配置（动态显示） ── -->
+          <Border Margin="0,0,0,20"
+                  Background="{StaticResource BgCardBrush}"
+                  BorderBrush="{StaticResource BorderBrush2}"
+                  BorderThickness="1" CornerRadius="6" Padding="12"
+                  Visibility="{Binding IsMultiPlayer, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel>
+              <TextBlock Text="联机配置" Style="{StaticResource SectionHeader}"/>
+
+              <!-- 创建房间 -->
+              <Border Background="#FF0A1520" CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                <StackPanel>
+                  <TextBlock Text="创建房间" Foreground="{StaticResource AccentBlueBrush}"
+                             FontSize="12" FontFamily="Microsoft YaHei" Margin="0,0,0,8"/>
+                  <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70"/><ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="房间号" Style="{StaticResource SectionHeader}"
+                               VerticalAlignment="Center" Margin="0"/>
+                    <TextBox  Grid.Column="1"
+                              Text="{Binding RoomId, UpdateSourceTrigger=PropertyChanged}"
+                              Height="30"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70"/><ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="密码" Style="{StaticResource SectionHeader}"
+                               VerticalAlignment="Center" Margin="0"/>
+                    <PasswordBox Grid.Column="1" x:Name="PwdCreate" Height="30"
+                                 PasswordChanged="OnPasswordChanged"/>
+                  </Grid>
+                  <Button Content="创建房间" Style="{StaticResource BtnBlue}"
+                          Margin="0,10,0,0" Height="34"
+                          Command="{Binding CreateRoomCommand}"/>
+                </StackPanel>
+              </Border>
+
+              <!-- 分隔 -->
+              <TextBlock Text="─── 或 ───" HorizontalAlignment="Center"
+                         Foreground="{StaticResource TextDimBrush}" FontSize="11"
+                         Margin="0,6"/>
+
+              <!-- 加入房间 -->
+              <Border Background="#FF0A1520" CornerRadius="6" Padding="12" Margin="0,0,0,0">
+                <StackPanel>
+                  <TextBlock Text="加入房间" Foreground="{StaticResource AccentGreenBrush}"
+                             FontSize="12" FontFamily="Microsoft YaHei" Margin="0,0,0,8"/>
+                  <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70"/><ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="房间号" Style="{StaticResource SectionHeader}"
+                               VerticalAlignment="Center" Margin="0"/>
+                    <TextBox  Grid.Column="1" Height="30"
+                              Text="{Binding RoomId, UpdateSourceTrigger=PropertyChanged}"/>
+                  </Grid>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="70"/><ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="密码" Style="{StaticResource SectionHeader}"
+                               VerticalAlignment="Center" Margin="0"/>
+                    <PasswordBox Grid.Column="1" x:Name="PwdJoin" Height="30"
+                                 PasswordChanged="OnJoinPasswordChanged"/>
+                  </Grid>
+                  <Button Content="加入房间" Style="{StaticResource BtnGreen}"
+                          Margin="0,10,0,0" Height="34"
+                          Command="{Binding JoinRoomCommand}"/>
+                </StackPanel>
+              </Border>
+
+              <!-- 状态 -->
+              <TextBlock Text="{Binding StatusMsg}" FontSize="11"
+                         Foreground="{StaticResource AccentAmberBrush}"
+                         FontFamily="Microsoft YaHei" Margin="0,8,0,0"
+                         HorizontalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+
+          <!-- ── 开始按钮（单人）── -->
+          <Button Content="开始游戏  ▶"
+                  Style="{StaticResource BtnBlue}"
+                  Height="48" FontSize="16" FontWeight="Bold"
+                  Visibility="{Binding IsMultiPlayer,
+                    Converter={StaticResource InvertBoolToVisibility}}"
+                  Command="{Binding StartSinglePlayerCommand}"/>
+
+          <TextBlock Text="{Binding StatusMsg}" FontSize="11"
+                     Foreground="{StaticResource AccentAmberBrush}"
+                     HorizontalAlignment="Center" Margin="0,10,0,0"/>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </Border>
+</Window>

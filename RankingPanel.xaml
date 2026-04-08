@@ -1,0 +1,60 @@
+<!-- RankingPanel.xaml -->
+<UserControl x:Class="AirlineEmpire.Views.RankingPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:AirlineEmpire.ViewModels"
+             FontFamily="Microsoft YaHei">
+  <StackPanel Margin="10">
+    <TextBlock Text="紧迫度排行" Style="{StaticResource SectionHeader}"/>
+    <TextBlock Text="滞留率高 → 优先处理" FontSize="10"
+               Foreground="{StaticResource TextDimBrush}" Margin="0,0,0,8"/>
+
+    <ItemsControl ItemsSource="{Binding Items}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate DataType="{x:Type vm:RankingItem}">
+          <Button Style="{StaticResource BtnGhost}" Margin="0,2"
+                  Command="{Binding DataContext.JumpToCommand,
+                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  CommandParameter="{Binding}">
+            <Grid Width="190">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="22"/>
+                <ColumnDefinition Width="38"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+              </Grid.ColumnDefinitions>
+
+              <!-- 排名 -->
+              <TextBlock Grid.Column="0" Text="{Binding Rank, StringFormat='#{0}'}"
+                         Foreground="{StaticResource TextDimBrush}"
+                         FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
+
+              <!-- IATA -->
+              <TextBlock Grid.Column="1" Text="{Binding Airport.Code}"
+                         FontFamily="Consolas" FontSize="13" FontWeight="Bold"
+                         Foreground="{StaticResource AccentBlueBrush}"
+                         VerticalAlignment="Center"/>
+
+              <!-- 进度条 -->
+              <Grid Grid.Column="2" Height="6" Margin="4,0" VerticalAlignment="Center"
+                    Background="#FF1C2E45">
+                <Rectangle HorizontalAlignment="Left" RadiusX="3" RadiusY="3"
+                           Width="{Binding Ratio, Converter={StaticResource RatioToWidth},
+                             ConverterParameter=90}"
+                           Fill="{Binding Level, Converter={StaticResource UrgencyToColor}}"/>
+              </Grid>
+
+              <!-- 数值 -->
+              <TextBlock Grid.Column="3" FontFamily="Consolas" FontSize="10"
+                         HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Run Text="{Binding Current}" Foreground="{StaticResource AccentGreenBrush}"/>
+                <Run Text="/" Foreground="{StaticResource TextDimBrush}"/>
+                <Run Text="{Binding Max}" Foreground="{StaticResource TextDimBrush}"/>
+              </TextBlock>
+            </Grid>
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>
